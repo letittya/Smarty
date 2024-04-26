@@ -1,6 +1,11 @@
 import RPi.GPIO as GPIO 
 import time
 from mfrc522 import SimpleMFRC522
+from rpi_lcd import LCD
+
+lcd=LCD()
+
+lcd.text("hello ebi",1)
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
