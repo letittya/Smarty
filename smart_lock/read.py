@@ -11,8 +11,9 @@ GPIO.setwarnings(False)
 buzzer = 35
 GPIO.setup(buzzer,GPIO.OUT)
 
-#relay_module = 37
-#GPIO.setup(relay_module,GPIO.OUT)
+relay_module = 37
+GPIO.setup(relay_module,GPIO.OUT)
+GPIO.output(relay_module,GPIO.HIGH)
 
 good_id = "789061940596"
 
@@ -24,12 +25,12 @@ def compare_ids_successful(id,good_id):
 		lcd.clear()
 		lcd.text("Permission",1)
 		lcd.text("granted",2)
-		#GPIO.output(relay_module,GPIO.HIGH)
+		GPIO.output(relay_module,GPIO.LOW)
 		GPIO.output(buzzer,GPIO.HIGH)
 		time.sleep(1)
 		GPIO.output(buzzer,GPIO.LOW)
 		time.sleep(5)
-		#GPIO.output(relay_module,GPIO.LOW)
+		GPIO.output(relay_module,GPIO.HIGH)
 		
 def not_permitted_buzzer():
 	GPIO.output(buzzer,GPIO.HIGH)
