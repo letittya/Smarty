@@ -13,7 +13,6 @@ GPIO.setup(buzzer,GPIO.OUT)
 
 relay_module = 37
 GPIO.setup(relay_module,GPIO.OUT)
-GPIO.output(relay_module,GPIO.HIGH)
 
 green_led=13
 red_led=11
@@ -23,6 +22,15 @@ GPIO.setup(red_led,GPIO.OUT)
 good_id = "789061940596"
 
 rfid_tag=SimpleMFRC522()
+
+
+def door_countdown():
+	lcd.clear()
+	lcd.text("Door will close",1)
+	for i in range(10, 0 , -1):
+		concat_string="in " + str(i)
+		lcd.text(concat_string ,2)
+		time.sleep(1)
 
 def compare_ids_successful(id,good_id):
 	if(id==good_id):
@@ -35,7 +43,7 @@ def compare_ids_successful(id,good_id):
 		GPIO.output(buzzer,GPIO.HIGH)
 		time.sleep(1)
 		GPIO.output(buzzer,GPIO.LOW)
-		time.sleep(5)
+		door_countdown()
 		GPIO.output(relay_module,GPIO.HIGH)
 		GPIO.output(green_led,GPIO.LOW)
 		
