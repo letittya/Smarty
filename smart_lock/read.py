@@ -5,20 +5,25 @@ from rpi_lcd import LCD
 
 lcd=LCD()
 
-GPIO.setmode(GPIO.BOARD)
-GPIO.setwarnings(False)
+# i will use the board pins, not BCM
+GPIO.setmode(GPIO.BOARD) 
+GPIO.setwarnings(False)  #opt not to receive warnings 
 
+#initiate the buzzer as output
 buzzer = 35
 GPIO.setup(buzzer,GPIO.OUT)
 
+#initiate relay as output 
 relay_module = 37
 GPIO.setup(relay_module,GPIO.OUT)
 
+#initiate bicolor LED as output
 green_led=13
 red_led=11
 GPIO.setup(green_led,GPIO.OUT)
 GPIO.setup(red_led,GPIO.OUT)
 
+#the permitted id
 good_id = "789061940596"
 
 rfid_tag=SimpleMFRC522()
