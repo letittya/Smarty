@@ -53,7 +53,6 @@ def compare_ids_NOT_successful(id,good_id):
 		lcd.clear()
 		lcd.text("Permission",1)
 		lcd.text("denied",2)
-		GPIO.output(red_led,GPIO.HIGH)
 		for i in range(3):
 			not_permitted_buzzer()
 		
