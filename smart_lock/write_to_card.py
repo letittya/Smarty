@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO 
+import time
 from mfrc522 import SimpleMFRC522     #the python library that reads/writes RFID tags via the budget RC522 RFID module
 from rpi_lcd import LCD #libary to write on the LCD
 
@@ -17,7 +18,9 @@ try:
 	print("Data written. Done!")
 	lcd.clear()
 	lcd.text("Done!",1)
+	time.sleep(1) # have the text stay on the lcd screen for 1 second 
 	
 finally:    #code that always gets executed 
+	lcd.clear() #clear lcd screen 
 	GPIO.cleanup()  # release all GPIO pins 
 
