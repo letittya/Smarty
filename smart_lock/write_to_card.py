@@ -2,8 +2,8 @@ import RPi.GPIO as GPIO
 from mfrc522 import SimpleMFRC522     #the python library that reads/writes RFID tags via the budget RC522 RFID module
 from rpi_lcd import LCD #libary to write on the LCD
 
-rfid_tag= SimpleMFRC522()      #create an instance of the class, that will be used to read/write the cards
-lcd=LCD() #instance of the LCD class
+rfid_tag= SimpleMFRC522()      #create an instance, that will be used to read/write the cards
+lcd=LCD() #instance of the LCD 
 
 try:
 	lcd.text("Insert the",1)
