@@ -1,5 +1,7 @@
 import RPi.GPIO as GPIO 
 import time
+import pyrebase
+from datetime import datetime
 from mfrc522 import SimpleMFRC522  #the python library that reads/writes RFID tags via the budget RC522 RFID module
 from rpi_lcd import LCD  #libary to write on the LCD
 
@@ -30,6 +32,19 @@ good_id = "789061940596"
 rfid_tag=SimpleMFRC522()   #create an instance, that will be used to read the cards
 
 
+# configuring the firebase realtime database connection
+config = {
+	"apiKey" : "AIzaSyDS-no7jgHMXU9JzBH16TMt65XWItCGlY4",
+	"authDomain" : "smarty-lock.firebaseapp.com",
+	"databaseURL" : "https://smarty-lock-default-rtdb.firebaseio.com/",
+	"storageBucket" : "smarty-lock.appspot.com",
+}
+
+firebase = pyrebase.initialize_app(config)
+
+db = firebase.database()
+
+
 def door_countdown():
 	lcd.clear()
 	lcd.text("Door will close",1)
@@ -37,14 +52,34 @@ def door_countdown():
 		concat_string="in " + str(i)  # make a string that contains the countdown
 		lcd.text(concat_string ,2)
 		time.sleep(1)   # wait 1 sec in between counts 
+		
+		
+def send_to_database(ids_successful,id,data):
+	current_time = datetime.now().strftime('%H:%M')
+	if (ids_successful):
+		status = "granted"
+	else:
+		status = "denied"
+		
+	data_for_database = { 
+		"id" : id,
+		"data" : data,
+		"timestamp" : current_time,
+		"access" : status
+	}
+	
+	db.child("RFID_scans"). push(data_for_database)
+	print("Sent to Firebase")
+	print(data_for_database)
 
-def compare_ids_successful(id,good_id):
+def compare_ids_successful(id,good_id, data):
 	# check if current id matches the good id
 	if(id==good_id):
 		print("Permission granted")
 		lcd.clear()
 		lcd.text("Permission",1)
 		lcd.text("granted",2)
+		send_to_database(True,id,data)
 		GPIO.output(green_led,GPIO.HIGH)   #turn green LED on
 		GPIO.output(relay_module,GPIO.LOW)   # unlock the door using the relay 
 		GPIO.output(buzzer,GPIO.HIGH)   #turn on buzzer 
@@ -62,13 +97,14 @@ def not_permitted_buzzer():
 	GPIO.output(red_led,GPIO.LOW)
 	time.sleep(0.5)
 		
-def compare_ids_NOT_successful(id,good_id):
+def compare_ids_NOT_successful(id,good_id,data):
 	# check if current id does NOT match the good id
 	if(id!=good_id):
 		print("Permission denied")
 		lcd.clear()
 		lcd.text("Permission",1)
 		lcd.text("denied",2)
+		send_to_database(False,id,data)
 		# indicate the unsuccessful access attempt by blinking the red led and turning on/off the buzzer 3 times 
 		for i in range(3):
 			not_permitted_buzzer()
@@ -87,8 +123,8 @@ while True:
 	print(data)
 	
 	# compare the given ID to the authorized ID
-	compare_ids_successful(id,good_id) 
-	compare_ids_NOT_successful(id,good_id)
+	compare_ids_successful(id,good_id, data) 
+	compare_ids_NOT_successful(id,good_id, data)
 	
 
 
