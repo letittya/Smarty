@@ -3,7 +3,7 @@ import time
 import pyrebase
 from datetime import datetime
 from mfrc522 import SimpleMFRC522  #the python library that reads/writes RFID tags via the budget RC522 RFID module
-from rpi_lcd import LCD  #libary to write on the LCD
+from rpi_lcd import LCD  #libary to write on the LCD display
 
 lcd=LCD()  #instance of the LCD 
 
@@ -11,16 +11,16 @@ lcd=LCD()  #instance of the LCD
 GPIO.setmode(GPIO.BOARD) 
 GPIO.setwarnings(False)  #opt not to receive warnings for GPIO setup 
 
-#initiate the buzzer as output
+#setting the buzzer as output
 buzzer = 35
 GPIO.setup(buzzer,GPIO.OUT)
 
-#initiate relay as output 
+#setting relay as output 
 relay_module = 37
 GPIO.setup(relay_module,GPIO.OUT)
 GPIO.output(relay_module,GPIO.HIGH) #the relay is locked in the beginning 
 
-#initiate bicolor LED as output
+#setting bicolor LED as output
 green_led=13
 red_led=11
 GPIO.setup(green_led,GPIO.OUT)
@@ -39,23 +39,21 @@ config = {
 	"databaseURL" : "https://smarty-lock-default-rtdb.firebaseio.com/",
 	"storageBucket" : "smarty-lock.appspot.com",
 }
-
 firebase = pyrebase.initialize_app(config)
-
 db = firebase.database()
 
-
+# handles the countdown on the LCD display when the door is opened 
 def door_countdown():
 	lcd.clear()
 	lcd.text("Door will close",1)
 	for i in range(10, 0 , -1):   # counting from 10 -> 1
 		concat_string="in " + str(i)  # make a string that contains the countdown
 		lcd.text(concat_string ,2)
-		time.sleep(1)   # wait 1 sec in between counts 
-		
-		
+		time.sleep(1)   # wait 1 sec in between numbers
+
+#sends the attempt to open to door to the Firebase database 		
 def send_to_database(ids_successful,id,data):
-	current_time = datetime.now().strftime('%H:%M')
+	current_time = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
 	if (ids_successful):
 		status = "granted"
 	else:
@@ -72,8 +70,8 @@ def send_to_database(ids_successful,id,data):
 	print("Sent to Firebase")
 	print(data_for_database)
 
+# check if current id matches the authorized id and if it does, it grants access 
 def compare_ids_successful(id,good_id, data):
-	# check if current id matches the good id
 	if(id==good_id):
 		print("Permission granted")
 		lcd.clear()
@@ -88,7 +86,8 @@ def compare_ids_successful(id,good_id, data):
 		door_countdown()   #display the countdown, 10 seconds until the door locks again 
 		GPIO.output(relay_module,GPIO.HIGH)   # lock the door 
 		GPIO.output(green_led,GPIO.LOW)   #turn off green LED 
-		
+
+#activates buzzer and red LED in order to indicate a denied entry		
 def not_permitted_buzzer():
 	GPIO.output(buzzer,GPIO.HIGH)
 	GPIO.output(red_led,GPIO.HIGH)
@@ -96,9 +95,9 @@ def not_permitted_buzzer():
 	GPIO.output(buzzer,GPIO.LOW)
 	GPIO.output(red_led,GPIO.LOW)
 	time.sleep(0.5)
-		
+
+# check if current id does NOT match the authorized id and if it DOESN'T, it denies access 		
 def compare_ids_NOT_successful(id,good_id,data):
-	# check if current id does NOT match the good id
 	if(id!=good_id):
 		print("Permission denied")
 		lcd.clear()
