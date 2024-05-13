@@ -18,10 +18,7 @@ module.exports = {
           intensified: "#141F15",
           more_intensified: "#162317",
         },
-        light:{
-          //a very light green
-          DEFAULT: " #CADBCC",
-        },
+        light: " #CADBCC",
       },
       fontFamily: {
         pthin: ["Poppins-Thin", "sans-serif"],
