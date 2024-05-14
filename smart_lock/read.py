@@ -107,23 +107,29 @@ def compare_ids_NOT_successful(id,good_id,data):
 		# indicate the unsuccessful access attempt by blinking the red led and turning on/off the buzzer 3 times 
 		for i in range(3):
 			not_permitted_buzzer()
-		
+
+flag=0		
 	
 # main loop that checks continuously for RFID tags 
 while True:
-	# read and get the data+id from the rfid card 
-	print("Place your card to scan")
+	if(flag == 0):  #keeps track if a card was scanned or not
+		print("Place your card to scan")
+		flag=1
 	# now print the text to the lcd screen
 	lcd.text("Place your", 1)
 	lcd.text("card to scan", 2)
-	id, data = rfid_tag.read()
-	id=str(id) #converting from int -> string
-	print(id)
-	print(data)
 	
-	# compare the given ID to the authorized ID
-	compare_ids_successful(id,good_id, data) 
-	compare_ids_NOT_successful(id,good_id, data)
+	#no block so that we can perform other tasks if there's no RFID tag
+	# if no block is not needed -> id, data = rfid_tag.read() 
+	id, data = rfid_tag.read_no_block()  # read and get the data+id from the rfid card, they are None if there's no card
+	if id:
+		id=str(id) #converting from int -> string
+		print(id)
+		print(data)
+		flag=0
+		# compare the given ID to the authorized ID
+		compare_ids_successful(id,good_id, data) 
+		compare_ids_NOT_successful(id,good_id, data)
 	
 
 
