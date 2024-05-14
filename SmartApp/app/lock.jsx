@@ -9,7 +9,6 @@ const Lock = () => {
   const [entries, setEntries] = useState([]);
   const [error, setError] = useState('');
 
- 
   useEffect(() => {
     const entriesRef = ref(db, 'RFID_scans');
     const unsubscribe = onValue(entriesRef, (snapshot) => {
@@ -33,31 +32,42 @@ const Lock = () => {
     };
   }, []);
 
-  const renderItem = ({ item }) => (
-    <View style={styles.entry}>
-      <Text className='text-green-200'>Access: {item.access}</Text>
-      <Text className='text-green-200'>Data: {item.data}</Text>
-      <Text className='text-green-200'>ID: {item.id}</Text>
-      <Text className='text-green-200'>Timestamp: {item.timestamp}</Text>
-    </View>
-  );
+  const renderItem = ({ item }) => {
+    const borderColor = item.access === 'granted' ? '#226711' : '#760B0B';
+    return (
+      <View style={[styles.entry, { borderColor }]}>
+        <Text className='text-white font-pbold text-lg'>{item.data}</Text>
+        <Text className='text-white font-pmedium'>
+          <Text className= 'font-bold'>ID:</Text> {item.id}
+        </Text>
+        <Text className='text-white font-pmedium'>
+          <Text className= 'font-bold'>Date & time:</Text> {item.timestamp}
+        </Text>
+        <View style={[
+          styles.accessBadge, 
+          item.access === 'granted' ? styles.accessGranted : styles.accessDenied
+        ]}>
+          <Text className='text-white font-pmedium'>
+            {item.access === 'granted' ? 'Granted' : 'Denied'}
+          </Text>
+        </View>
+      </View>
+    );
+  };
 
   return (
-    
-      <SafeAreaView  className='bg-primary'style={styles.container}>
-        <FlatList
-          data={entries}
-          renderItem={renderItem}
-           keyExtractor={item => item.firebaseKey}
-           ListEmptyComponent={<Text className='text-green-200'>No data found</Text>}
-           style={styles.scrollView}
-         />
-         {error ? <Text className='text-green-200'>Error: {error}</Text> : null}
-        <StatusBar style="dark" />
-
-        <StatusBar style="light"></StatusBar>
-       </SafeAreaView>
-    
+    <SafeAreaView className='bg-primary' style={styles.container}>
+      <FlatList
+        data={entries}
+        renderItem={renderItem}
+        keyExtractor={item => item.firebaseKey}
+        ListEmptyComponent={<Text className='text-green-200'>No data found</Text>}
+        style={styles.scrollView}
+      />
+      {error ? <Text className='text-green-200'>Error: {error}</Text> : null}
+      <StatusBar style="dark" />
+      <StatusBar style="light" />
+    </SafeAreaView>
   );
 };
 
@@ -77,8 +87,19 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#cccccc',
     borderRadius: 5,
-    color : 'light'
-  }
+  },
+  accessBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginVertical: 5,
+  },
+  accessGranted: {
+    backgroundColor: '#226711', 
+  },
+  accessDenied: {
+    backgroundColor: '#760B0B', 
+  },
 });

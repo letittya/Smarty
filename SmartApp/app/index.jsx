@@ -11,7 +11,7 @@ export default function App() {
 
   return (
     <SafeAreaView className="bg-primary h-full">
-      <View className="justify-center items-center mt-8 px-5">
+      <View className="justify-center items-center mt-11 px-5">
         <Image
           source={images.logo}
           className="w-[220px] h-[115px]"
@@ -25,13 +25,13 @@ export default function App() {
         contentContainerStyle={{ paddingHorizontal: 8 , paddingTop: 80}}
       >
         <TouchableOpacity onPress={() => router.push('/lock')} activeOpacity={0.5}>
-          <Image source={images.lock_img} style={{ width: 300, height: 300, marginHorizontal: 2, borderRadius: 15, resizeMode: 'contain' }} />
+          <Image source={images.lock_img} style={{ width: 270, height: 350,  resizeMode: 'contain' }} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push('/lock')} activeOpacity={0.5}>
-          <Image source={images.lock_img} style={{ width: 300, height: 300, marginHorizontal: 2, borderRadius: 15, resizeMode: 'contain' }} />
+          <Image source={images.lock_img} style={{ width: 270, height: 350,  resizeMode: 'contain' }} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push('/lock')} activeOpacity={0.5}>
-          <Image source={images.lock_img} style={{ width: 300, height: 300, marginHorizontal: 2, borderRadius: 15, resizeMode: 'contain' }} />
+          <Image source={images.lock_img} style={{ width: 270, height: 350,  resizeMode: 'contain' }} />
         </TouchableOpacity>
         
       </ScrollView>
