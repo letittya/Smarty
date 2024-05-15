@@ -18,7 +18,7 @@ GPIO.setup(buzzer,GPIO.OUT)
 #setting relay as output 
 relay_module = 37
 GPIO.setup(relay_module,GPIO.OUT)
-# GPIO.output(relay_module,GPIO.HIGH) #the relay is locked in the beginning 
+GPIO.output(relay_module,GPIO.HIGH) #the relay is locked in the beginning 
 
 #setting bicolor LED as output
 green_led=13
