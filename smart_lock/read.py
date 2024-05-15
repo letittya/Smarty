@@ -26,6 +26,37 @@ red_led=11
 GPIO.setup(green_led,GPIO.OUT)
 GPIO.setup(red_led,GPIO.OUT)
 
+direction = 38 # the GPIO pin for direction
+step = 40  # the GPIO pin for step
+clock_wise = 1
+c_clock_wise= 0
+# steps per revolution. The motor has 7.5°/step. Dividing 360/7.5 we get 48 steps/revolution.
+spr = 48  
+
+photoresistor_pin = 7
+
+#setting direction and step of motor as output
+GPIO.setup(direction, GPIO.OUT)
+GPIO.setup(step, GPIO.OUT)
+#initial direction is clockwise 
+GPIO.output(direction, clock_wise)
+
+stepper_mode = ( 8 , 10 , 12)
+GPIO.setup(stepper_mode, GPIO.OUT)
+resolution = { 'Full' : ( 0, 0, 0), 
+				'Half': ( 1, 0, 0),
+				'1/4': (0,1,0),
+				'1/8' : (1,1,0),
+				'1/16': (0,0,1),
+				'1/32' : (1,0,1) }
+				
+GPIO.output(stepper_mode, resolution['1/32'])
+
+step_count = spr * 32
+# 0,0208 is 1sec/48
+delay = 0.0208 / 32
+
+
 #the permitted id
 good_id = "789061940596"
 
@@ -130,6 +161,26 @@ while True:
 		# compare the given ID to the authorized ID
 		compare_ids_successful(id,good_id, data) 
 		compare_ids_NOT_successful(id,good_id, data)
+	
+	else:
+		GPIO.setup(photoresistor_pin, GPIO.OUT)
+		GPIO.output(photoresistor_pin, GPIO.LOW)
+		time.sleep(0.1)
+	
+		GPIO.setup(photoresistor_pin, GPIO.IN)
+		current_time = time.time()
+		diff = 0
+		while(GPIO.input (photoresistor_pin) == GPIO.LOW):
+			diff = time.time() - current_time
+		
+		print(diff *100000)
+		if( diff * 100000 > 150):
+			for x in range(step_count):
+				GPIO.output(step, GPIO.HIGH)
+				time.sleep(delay)
+				GPIO.output(step, GPIO.LOW)
+				time.sleep(delay)
+		time.sleep(1)
 	
 
 
