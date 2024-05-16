@@ -72,6 +72,7 @@ config = {
 firebase = pyrebase.initialize_app(config)
 db = firebase.database()
 
+
 # handles the countdown on the LCD display when the door is opened 
 def door_countdown():
 	lcd.clear()
@@ -80,9 +81,10 @@ def door_countdown():
 		concat_string="in " + str(i)  # make a string that contains the countdown
 		lcd.text(concat_string ,2)
 		time.sleep(1)   # wait 1 sec in between numbers
+		
 
 #sends the attempt to open to door to the Firebase database 		
-def send_to_database(ids_successful,id,data):
+def send_to_database_rfid(ids_successful,id,data):
 	current_time = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
 	if (ids_successful):
 		status = "granted"
@@ -95,10 +97,10 @@ def send_to_database(ids_successful,id,data):
 		"timestamp" : current_time,
 		"access" : status
 	}
-	
 	db.child("RFID_scans"). push(data_for_database)
 	print("Sent to Firebase")
 	print(data_for_database)
+	
 
 # check if current id matches the authorized id and if it does, it grants access 
 def compare_ids_successful(id,good_id, data):
@@ -107,7 +109,7 @@ def compare_ids_successful(id,good_id, data):
 		lcd.clear()
 		lcd.text("Permission",1)
 		lcd.text("granted",2)
-		send_to_database(True,id,data)
+		send_to_database_rfid(True,id,data)
 		GPIO.output(green_led,GPIO.HIGH)   #turn green LED on
 		GPIO.output(relay_module,GPIO.LOW)   # unlock the door using the relay 
 		GPIO.output(buzzer,GPIO.HIGH)   #turn on buzzer 
@@ -116,6 +118,7 @@ def compare_ids_successful(id,good_id, data):
 		door_countdown()   #display the countdown, 10 seconds until the door locks again 
 		GPIO.output(relay_module,GPIO.HIGH)   # lock the door 
 		GPIO.output(green_led,GPIO.LOW)   #turn off green LED 
+
 
 #activates buzzer and red LED in order to indicate a denied entry		
 def not_permitted_buzzer():
@@ -126,6 +129,7 @@ def not_permitted_buzzer():
 	GPIO.output(red_led,GPIO.LOW)
 	time.sleep(0.5)
 
+
 # check if current id does NOT match the authorized id and if it DOESN'T, it denies access 		
 def compare_ids_NOT_successful(id,good_id,data):
 	if(id!=good_id):
@@ -133,12 +137,14 @@ def compare_ids_NOT_successful(id,good_id,data):
 		lcd.clear()
 		lcd.text("Permission",1)
 		lcd.text("denied",2)
-		send_to_database(False,id,data)
+		send_to_database_rfid(False,id,data)
 		# indicate the unsuccessful access attempt by blinking the red led and turning on/off the buzzer 3 times 
 		for i in range(3):
 			not_permitted_buzzer()
+
 			
 def blinds_up():
+	db.child("Blinds").set(1) #set in the database that blinds are up
 	#direction is clockwise 
 	GPIO.output(direction, clock_wise)
 	for x in range(step_count):
@@ -146,8 +152,10 @@ def blinds_up():
 		time.sleep(delay)
 		GPIO.output(step, GPIO.LOW)
 		time.sleep(delay)
+	
 		
 def blinds_down():
+	db.child("Blinds").set(0) #set in the database that blinds are down
 	#direction is counter clockwise 
 	GPIO.output(direction, c_clock_wise)
 	for x in range(step_count):
@@ -161,7 +169,6 @@ def measure_light_intensity():
 	GPIO.setup(photoresistor_pin, GPIO.OUT)
 	GPIO.output(photoresistor_pin, GPIO.LOW)
 	time.sleep(0.1)
-	
 	GPIO.setup(photoresistor_pin, GPIO.IN)
 	current_time = time.time()
 	diff = 0
@@ -169,14 +176,17 @@ def measure_light_intensity():
 		diff = time.time() - current_time
 	print(diff *100000)
 	if( diff * 100000 > 150):
-		blinds_down();
+		if( db.child("Blinds").get().val() != 0 ) :
+			blinds_down();
 	elif ( diff * 100000 < 60):
-		blinds_up();
+		if( db.child("Blinds").get().val() != 1 ) :
+			blinds_up();
 		
 	time.sleep(0.5)
 	
 
 flag=0		
+	
 	
 # main loop that checks continuously for RFID tags 
 while True:
