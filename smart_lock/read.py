@@ -72,6 +72,7 @@ config = {
 firebase = pyrebase.initialize_app(config)
 db = firebase.database()
 
+current_blinds_state = db.child("Blinds").get().val()  #get the value thats stored in database for blinds
 
 # handles the countdown on the LCD display when the door is opened 
 def door_countdown():
@@ -144,6 +145,8 @@ def compare_ids_NOT_successful(id,good_id,data):
 
 			
 def blinds_up():
+	global current_blinds_state
+	current_blinds_state = 1
 	db.child("Blinds").set(1) #set in the database that blinds are up
 	#direction is clockwise 
 	GPIO.output(direction, clock_wise)
@@ -155,6 +158,8 @@ def blinds_up():
 	
 		
 def blinds_down():
+	global current_blinds_state
+	current_blinds_state = 0
 	db.child("Blinds").set(0) #set in the database that blinds are down
 	#direction is counter clockwise 
 	GPIO.output(direction, c_clock_wise)
@@ -163,7 +168,6 @@ def blinds_down():
 		time.sleep(delay)
 		GPIO.output(step, GPIO.LOW)
 		time.sleep(delay)
-	
 			
 def measure_light_intensity():
 	GPIO.setup(photoresistor_pin, GPIO.OUT)
@@ -176,11 +180,17 @@ def measure_light_intensity():
 		diff = time.time() - current_time
 	print(diff *100000)
 	if( diff * 100000 > 150):
-		if( db.child("Blinds").get().val() != 0 ) :
+		if( current_blinds_state != 0 ) :
 			blinds_down();
 	elif ( diff * 100000 < 60):
-		if( db.child("Blinds").get().val() != 1 ) :
+		if( current_blinds_state != 1 ) :
 			blinds_up();
+	else:
+		status_from_app = db.child("Blinds").get().val()
+		if (status_from_app == 1 and current_blinds_state != 1):
+			blinds_up()
+		elif (status_from_app == 0 and current_blinds_state != 0):
+			blinds_down()
 		
 	time.sleep(0.5)
 	
