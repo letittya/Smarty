@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, ScrollView, View, FlatList , RefreshControl } from 'react-native';
+import { StyleSheet, Text, ScrollView, View, FlatList , ActivityIndicator } from 'react-native';
 import { db } from '../config';
 import { ref, onValue } from 'firebase/database';
 import { StatusBar } from 'expo-status-bar';
@@ -9,6 +9,7 @@ import { icons } from '../constants';
 const Lock = () => {
   const [entries, setEntries] = useState([]);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const entriesRef = ref(db, 'RFID_scans');
@@ -20,6 +21,7 @@ const Lock = () => {
           ...data[key]
         })).reverse();   // to show the data from database starting from the newest entry 
         setEntries(loadedData);
+        setIsLoading(false);
       } else {
         console.log("No data available");
       }
@@ -32,6 +34,17 @@ const Lock = () => {
       unsubscribe();
     };
   }, []);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className='bg-primary h-full'>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#576F00" />
+        </View>
+        <StatusBar style="light" />
+      </SafeAreaView>
+    );
+  }
 
   const renderItem = ({ item }) => {
     const borderColor = item.access === 'granted' ? '#226711' : '#760B0B';
@@ -79,6 +92,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   scrollView: {
     width: '100%',
