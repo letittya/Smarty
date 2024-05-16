@@ -168,6 +168,18 @@ def blinds_down():
 		time.sleep(delay)
 		GPIO.output(step, GPIO.LOW)
 		time.sleep(delay)
+
+
+def blinds_half(clockwise_or_counter_clockwise, status):
+	global current_blinds_state
+	current_blinds_state = status
+	db.child("Blinds").set(status) #set in the database that blinds are half-up ( same as half-down )
+	GPIO.output(direction, clockwise_or_counter_clockwise)
+	for x in range(step_count // 2 ):  #performing floor division
+		GPIO.output(step, GPIO.HIGH)
+		time.sleep(delay)
+		GPIO.output(step, GPIO.LOW)
+		time.sleep(delay)
 			
 def measure_light_intensity():
 	GPIO.setup(photoresistor_pin, GPIO.OUT)
@@ -179,18 +191,30 @@ def measure_light_intensity():
 	while(GPIO.input (photoresistor_pin) == GPIO.LOW):
 		diff = time.time() - current_time
 	print(diff *100000)
-	if( diff * 100000 > 150):
-		if( current_blinds_state != 0 ) :
-			blinds_down();
+	if( diff * 100000 > 400):
+		if( current_blinds_state == 1) :
+			blinds_down()
+		if( current_blinds_state == 0.5 ):
+			blinds_half(0,0)
 	elif ( diff * 100000 < 60):
-		if( current_blinds_state != 1 ) :
+		if( current_blinds_state == 0 ) :
 			blinds_up();
+		if( current_blinds_state == 0.5 ):
+			blinds_half(1,1)
 	else:
 		status_from_app = db.child("Blinds").get().val()
-		if (status_from_app == 1 and current_blinds_state != 1):
+		if (status_from_app == 1 and current_blinds_state == 0):
 			blinds_up()
-		elif (status_from_app == 0 and current_blinds_state != 0):
+		elif (status_from_app == 0 and current_blinds_state == 1):
 			blinds_down()
+		elif (status_from_app == 1 and current_blinds_state == 0.5):
+			blinds_half(1,1)
+		elif (status_from_app == 0 and current_blinds_state == 0.5):
+			blinds_half(0,0)
+		elif (status_from_app == 0.5 and current_blinds_state == 1):
+			blinds_half(0,0.5) # counter clock wise
+		elif (status_from_app == 0.5 and current_blinds_state == 0):
+			blinds_half(1,0.5) #clock wise
 		
 	time.sleep(0.5)
 	
