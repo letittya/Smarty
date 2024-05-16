@@ -4,6 +4,7 @@ import { db } from '../config';
 import { ref, onValue } from 'firebase/database';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { icons } from '../constants';
 
 const Lock = () => {
   const [entries, setEntries] = useState([]);
@@ -61,7 +62,6 @@ const Lock = () => {
         data={entries}
         renderItem={renderItem}
         keyExtractor={item => item.firebaseKey}
-        ListEmptyComponent={<Text className='text-green-200'>No data found</Text>}
         style={styles.scrollView}
       />
       {error ? <Text className='text-green-200'>Error: {error}</Text> : null}
