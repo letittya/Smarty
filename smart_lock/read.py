@@ -33,13 +33,12 @@ c_clock_wise= 0
 # steps per revolution. The motor has 7.5°/step. Dividing 360/7.5 we get 48 steps/revolution.
 spr = 48  
 
+#photoresistor is on GPIO pin 7 
 photoresistor_pin = 7
 
 #setting direction and step of motor as output
 GPIO.setup(direction, GPIO.OUT)
 GPIO.setup(step, GPIO.OUT)
-#initial direction is clockwise 
-GPIO.output(direction, clock_wise)
 
 stepper_mode = ( 8 , 10 , 12)
 GPIO.setup(stepper_mode, GPIO.OUT)
@@ -138,6 +137,44 @@ def compare_ids_NOT_successful(id,good_id,data):
 		# indicate the unsuccessful access attempt by blinking the red led and turning on/off the buzzer 3 times 
 		for i in range(3):
 			not_permitted_buzzer()
+			
+def blinds_up():
+	#direction is clockwise 
+	GPIO.output(direction, clock_wise)
+	for x in range(step_count):
+		GPIO.output(step, GPIO.HIGH)
+		time.sleep(delay)
+		GPIO.output(step, GPIO.LOW)
+		time.sleep(delay)
+		
+def blinds_down():
+	#direction is counter clockwise 
+	GPIO.output(direction, c_clock_wise)
+	for x in range(step_count):
+		GPIO.output(step, GPIO.HIGH)
+		time.sleep(delay)
+		GPIO.output(step, GPIO.LOW)
+		time.sleep(delay)
+	
+			
+def measure_light_intensity():
+	GPIO.setup(photoresistor_pin, GPIO.OUT)
+	GPIO.output(photoresistor_pin, GPIO.LOW)
+	time.sleep(0.1)
+	
+	GPIO.setup(photoresistor_pin, GPIO.IN)
+	current_time = time.time()
+	diff = 0
+	while(GPIO.input (photoresistor_pin) == GPIO.LOW):
+		diff = time.time() - current_time
+	print(diff *100000)
+	if( diff * 100000 > 150):
+		blinds_down();
+	elif ( diff * 100000 < 60):
+		blinds_up();
+		
+	time.sleep(0.5)
+	
 
 flag=0		
 	
@@ -163,24 +200,8 @@ while True:
 		compare_ids_NOT_successful(id,good_id, data)
 	
 	else:
-		GPIO.setup(photoresistor_pin, GPIO.OUT)
-		GPIO.output(photoresistor_pin, GPIO.LOW)
-		time.sleep(0.1)
-	
-		GPIO.setup(photoresistor_pin, GPIO.IN)
-		current_time = time.time()
-		diff = 0
-		while(GPIO.input (photoresistor_pin) == GPIO.LOW):
-			diff = time.time() - current_time
+		measure_light_intensity()
 		
-		print(diff *100000)
-		if( diff * 100000 > 150):
-			for x in range(step_count):
-				GPIO.output(step, GPIO.HIGH)
-				time.sleep(delay)
-				GPIO.output(step, GPIO.LOW)
-				time.sleep(delay)
-		time.sleep(1)
 	
 
 
