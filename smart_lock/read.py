@@ -191,12 +191,14 @@ def measure_light_intensity():
 	while(GPIO.input (photoresistor_pin) == GPIO.LOW):
 		diff = time.time() - current_time
 	print(diff *100000)
-	if( diff * 100000 > 400):
+	# get value from database to see if automated blinds are enabled or disabled
+	automated_blinds = db.child("Automated_blinds").get().val()
+	if( diff * 100000 > 400 and automated_blinds=='enabled'):
 		if( current_blinds_state == 1) :
 			blinds_down()
 		if( current_blinds_state == 0.5 ):
 			blinds_half(0,0)
-	elif ( diff * 100000 < 60):
+	elif ( diff * 100000 < 60 and automated_blinds=='enabled'):
 		if( current_blinds_state == 0 ) :
 			blinds_up();
 		if( current_blinds_state == 0.5 ):
