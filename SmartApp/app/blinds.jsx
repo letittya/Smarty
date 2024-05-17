@@ -8,20 +8,33 @@ import { ref, set, onValue } from 'firebase/database';
 const Blinds = () => {
   const [position, setPosition] = useState(0); // 0: Closed, 0.5: Half-Open, 1: Open
   const [isLoading, setIsLoading] = useState(true);
+  const [automation, setAutomation] = useState('disabled'); // 'disabled' or 'enabled'
 
-  // Fetch the initial state of the blinds from the database
+  // Fetch the initial state of the blinds and automation from the database
   useEffect(() => {
     const blindsRef = ref(db, 'Blinds');
+    const automationRef = ref(db, 'Automated_blinds');
+
     onValue(blindsRef, (snapshot) => {
       const data = snapshot.val();
       setPosition(data);
       setIsLoading(false);  // Set loading to false after fetching data
+    });
+
+    onValue(automationRef, (snapshot) => {
+      const data = snapshot.val();
+      setAutomation(data);
     });
   }, []);
 
   const updatePosition = (newPosition) => {
     setPosition(newPosition);
     set(ref(db, 'Blinds'), newPosition);
+  };
+
+  const updateAutomation = (newStatus) => {
+    setAutomation(newStatus);
+    set(ref(db, 'Automated_blinds'), newStatus);
   };
 
   if (isLoading) {
@@ -38,6 +51,29 @@ const Blinds = () => {
   return (
     <SafeAreaView className='bg-primary h-full'>
       <View style={styles.centered}>
+        <Text className='text-white font-pbold text-lg '>
+          {automation === 'enabled' ? "Disable" : "Enable"} automated
+        </Text>
+        <Text className='text-white font-pbold text-lg mb-3'>
+          closing and opening ? 
+        </Text>
+        <View style={styles.switchContainer}>
+          <TouchableOpacity
+            style={[styles.switchButton, automation === 'disabled' && styles.activeButton]}
+            onPress={() => updateAutomation('disabled')}
+          >
+            <Text style={styles.switchText}>Disabled</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.switchButton, automation === 'enabled' && styles.activeButton]}
+            onPress={() => updateAutomation('enabled')}
+          >
+            <Text style={styles.switchText}>Enabled</Text>
+          </TouchableOpacity>
+        </View>
+        </View>
+
+      <View style={styles.centered_2}>
         <Text className='text-white font-pbold text-lg m-3'>
           {position === 1 ? "Blinds are opened  ☀︎" : position === 0.5 ? "Blinds are half-opened  ☁︎" : "Blinds are closed  ☾"}
         </Text>
@@ -72,7 +108,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    marginTop: 350,
+    marginTop: 150,
+  },
+  centered_2: {
+    flex: 1,
+    justifyContent: "flex-start",
+    alignItems: "center",
+    marginTop: -80,
   },
   switchContainer: {
     flexDirection: 'row',
@@ -81,6 +123,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#91BD7A',
     borderRadius: 50,
     padding: 5, 
+    marginVertical: 10, // added margin for spacing between the switches
   },
   switchButton: {
     width: 108, 
