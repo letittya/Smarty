@@ -62,8 +62,8 @@ const Temperature = () => {
         <View className="mb-12" style={styles.row}>
           <Image source={images.temperature_in} style={{ width: 90, height: 150,  resizeMode: 'contain' }}  />
           <View>
-            <Text className='mb-6 ml-12 text-white font-pbold text-lg'>{temperature}°C</Text>
-            <Text className='ml-12 text-white font-pbold text-lg'>{temperatureFahrenheit}°F</Text>
+            <Text className='mb-6 ml-12 text-white font-pbold text-xl'>{temperature} °C</Text>
+            <Text className='ml-12 text-white font-pbold text-xl'>{temperatureFahrenheit} °F</Text>
           </View>
         </View>
         <View style={styles.roundedRectangle}>
@@ -71,7 +71,7 @@ const Temperature = () => {
         </View>
         <View className="m-5" style={styles.row}>
           <Image source={images.humidity_in} style={{ width: 90, height: 150,  resizeMode: 'contain' }}  />
-          <Text className='ml-12 text-white font-pbold text-lg'>{humidity}%</Text>
+          <Text className='ml-12 text-white font-pbold text-xl'>{humidity} %</Text>
         </View>
       </View>
       
