@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO 
 import time
 import pyrebase
+import Adafruit_DHT as dht
 from datetime import datetime
 from mfrc522 import SimpleMFRC522  #the python library that reads/writes RFID tags via the budget RC522 RFID module
 from rpi_lcd import LCD  #libary to write on the LCD display
@@ -221,6 +222,15 @@ def measure_light_intensity():
 	time.sleep(0.5)
 	
 
+def read_DHT22():
+	humidity,temperature_C = dht.read(dht.DHT22, 16) #GPIO pin 16 (board pin 36) is the DHT22's data pin
+	if humidity is not None and temperature_C is not None:
+		humidity = round(humidity,1)
+		temperature_C = round(temperature_C,1)
+		print( "Celcius: {}C,Humidity: {}%".format(temperature_C,humidity))
+		db.child("DHT22").child("Temperature_Celcius").set(temperature_C)
+		db.child("DHT22").child("Humidity").set(humidity)
+
 flag=0		
 	
 	
@@ -247,6 +257,7 @@ while True:
 	
 	else:
 		measure_light_intensity()
+		read_DHT22()
 		
 	
 
