@@ -4,7 +4,6 @@ import { db } from '../config';
 import { ref, onValue } from 'firebase/database';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { icons } from '../constants';
 
 const Lock = () => {
   const [entries, setEntries] = useState([]);
