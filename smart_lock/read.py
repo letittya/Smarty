@@ -236,12 +236,22 @@ def read_DHT22_and_automated_fan():
 		print( "Celcius: {}C,Humidity: {}%".format(temperature_C,humidity))
 		db.child("DHT22").child("Temperature_Celcius").set(temperature_C)
 		db.child("DHT22").child("Humidity").set(humidity)
-		if(temperature_C >= 25):
+		fan_enabled = db.child("DHT22").child("Fan_automated").get().val()
+		if(temperature_C >= 25 and fan_enabled == 'enabled'):
 			GPIO.output(fan,GPIO.LOW)
 			db.child("DHT22").child("Fan").set(1)
+		if(temperature_C <= 23 and fan_enabled == 'enabled'):
+			GPIO.output(fan,GPIO.HIGH)
+			db.child("DHT22").child("Fan").set(0)
+		# check for values from app
+		fan_rn = db.child("DHT22").child("Fan").get().val()
+		if( fan_rn == 1):
+			GPIO.output(fan,GPIO.LOW)
+		elif (fan_rn == 0):
+			GPIO.output(fan,GPIO.HIGH)
+
 
 flag=0		
-	
 	
 # main loop that checks continuously for RFID tags 
 while True:
