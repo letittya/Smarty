@@ -36,6 +36,7 @@ const RootLayout = () => {
         <Stack.Screen name="lock" options={{ headerShown: false}}/> 
         <Stack.Screen name="temp" options={{ headerShown: false}}/> 
         <Stack.Screen name="blinds" options={{ headerShown: false}}/> 
+        <Stack.Screen name="fan" options={{ headerShown: false}}/> 
     </Stack>
 
   )
