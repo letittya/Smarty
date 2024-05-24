@@ -21,6 +21,11 @@ relay_module = 37
 GPIO.setup(relay_module,GPIO.OUT)
 GPIO.output(relay_module,GPIO.HIGH) #the relay is locked in the beginning 
 
+#setting fan (a relay) as output
+fan=31
+GPIO.setup(fan,GPIO.OUT)
+GPIO.output(fan,GPIO.HIGH) #fan is off in the beginning
+
 #setting bicolor LED as output
 green_led=13
 red_led=11
@@ -223,7 +228,7 @@ def measure_light_intensity():
 	time.sleep(0.5)
 	
 
-def read_DHT22():
+def read_DHT22_and_automated_fan():
 	humidity,temperature_C = dht.read(dht.DHT22, 16) #GPIO pin 16 (board pin 36) is the DHT22's data pin
 	if humidity is not None and temperature_C is not None:
 		humidity = round(humidity,1)
@@ -231,6 +236,9 @@ def read_DHT22():
 		print( "Celcius: {}C,Humidity: {}%".format(temperature_C,humidity))
 		db.child("DHT22").child("Temperature_Celcius").set(temperature_C)
 		db.child("DHT22").child("Humidity").set(humidity)
+		if(temperature_C >= 25):
+			GPIO.output(fan,GPIO.LOW)
+			db.child("DHT22").child("Fan").set(1)
 
 flag=0		
 	
@@ -258,7 +266,7 @@ while True:
 	
 	else:
 		measure_light_intensity()
-		read_DHT22()
+		read_DHT22_and_automated_fan()
 		
 	
 
