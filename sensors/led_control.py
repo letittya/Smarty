@@ -3,7 +3,7 @@ from rpi_ws281x import PixelStrip, Color
 
 # LED strip configuration:
 LED_COUNT = 30        # Number of LED pixels.
-LED_PIN = 12          # GPIO pin connected to the pixels (12 corresponds to GPIO 12).
+LED_PIN = 18          # GPIO pin connected to the pixels (18 is commonly used with PWM).
 LED_FREQ_HZ = 800000  # LED signal frequency in hertz (usually 800kHz).
 LED_DMA = 10          # DMA channel to use for generating signal (try 10).
 LED_BRIGHTNESS = 255  # Set to 0 for darkest and 255 for brightest.
@@ -16,24 +16,17 @@ strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRI
 # Initialize the library (must be called once before other functions).
 strip.begin()
 
-def color_wipe(strip, color, wait_ms=50):
-    """Wipe color across display a pixel at a time."""
+def set_strip_color(strip, color):
+    """Set the color of all pixels on the strip."""
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
-        strip.show()
-        time.sleep(wait_ms / 1000.0)
+    strip.show()
 
 # Main program logic follows:
 if __name__ == '__main__':
     try:
+        set_strip_color(strip, Color(255, 0, 0))  # Set all LEDs to red
         while True:
-            # Color wipe animations.
-            color_wipe(strip, Color(255, 0, 0))  # Red wipe
-            time.sleep(1)
-            color_wipe(strip, Color(0, 255, 0))  # Green wipe
-            time.sleep(1)
-            color_wipe(strip, Color(0, 0, 255))  # Blue wipe
-            time.sleep(1)
-
+            time.sleep(1)  # Keep the script running
     except KeyboardInterrupt:
-        color_wipe(strip, Color(0, 0, 0), 10)
+        set_strip_color(strip, Color(0, 0, 0))  # Turn off all LEDs on exit
