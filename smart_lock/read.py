@@ -32,6 +32,15 @@ red_led=11
 GPIO.setup(green_led,GPIO.OUT)
 GPIO.setup(red_led,GPIO.OUT)
 
+#setting heating on LED as output
+heat_led=18
+GPIO.setup(heat_led,GPIO.OUT)
+
+#setting button as input to unlock door from inside the house
+button=16
+#configure an internal pull-up resistor so that when button isn't pressed it will read as HIGH
+GPIO.setup(button,GPIO.IN, pull_up_down = GPIO.PUD_UP) 
+
 direction = 38 # the GPIO pin for direction
 step = 40  # the GPIO pin for step
 clock_wise = 1
@@ -61,7 +70,6 @@ step_count = spr * 60
 # 0,0208 is 1sec/48
 delay = 0.0208 / 25
 
-
 #the permitted id
 good_id = "789061940596"
 
@@ -81,10 +89,10 @@ db = firebase.database()
 current_blinds_state = db.child("Blinds").get().val()  #get the value thats stored in database for blinds
 
 # handles the countdown on the LCD display when the door is opened 
-def door_countdown():
+def door_countdown(number):
 	lcd.clear()
 	lcd.text("Door will close",1)
-	for i in range(10, 0 , -1):   # counting from 10 -> 1
+	for i in range(number, 0 , -1):   # counting from number -> 1
 		concat_string="in " + str(i)  # make a string that contains the countdown
 		lcd.text(concat_string ,2)
 		time.sleep(1)   # wait 1 sec in between numbers
@@ -122,7 +130,7 @@ def compare_ids_successful(id,good_id, data):
 		GPIO.output(buzzer,GPIO.HIGH)   #turn on buzzer 
 		time.sleep(1)
 		GPIO.output(buzzer,GPIO.LOW)   #turn off buzzer 
-		door_countdown()   #display the countdown, 10 seconds until the door locks again 
+		door_countdown(10)   #display the countdown, 10 seconds until the door locks again 
 		GPIO.output(relay_module,GPIO.HIGH)   # lock the door 
 		GPIO.output(green_led,GPIO.LOW)   #turn off green LED 
 
@@ -148,7 +156,7 @@ def compare_ids_NOT_successful(id,good_id,data):
 		# indicate the unsuccessful access attempt by blinking the red led and turning on/off the buzzer 3 times 
 		for i in range(3):
 			not_permitted_buzzer()
-
+	
 			
 def blinds_up():
 	global current_blinds_state
@@ -249,9 +257,18 @@ def read_DHT22_and_automated_fan():
 			GPIO.output(fan,GPIO.LOW)
 		elif (fan_rn == 0):
 			GPIO.output(fan,GPIO.HIGH)
+			
+
+def button_pressed():
+	global button_was_pressed
+	print("Button pressed")
+	GPIO.output(relay_module,GPIO.LOW)   # unlock the door using the relay 
+	door_countdown(5)
+	GPIO.output(relay_module,GPIO.HIGH)   # lock the door 
+	print("Button is finished doing its business")
 
 
-flag=0		
+flag = 0	
 	
 # main loop that checks continuously for RFID tags 
 while True:
@@ -261,6 +278,8 @@ while True:
 	# now print the text to the lcd screen
 	lcd.text("Place your", 1)
 	lcd.text("card to scan", 2)
+	
+	button_state = GPIO.input(button)
 	
 	#no block so that we can perform other tasks if there's no RFID tag
 	# if no block is not needed -> id, data = rfid_tag.read() 
@@ -274,9 +293,14 @@ while True:
 		compare_ids_successful(id,good_id, data) 
 		compare_ids_NOT_successful(id,good_id, data)
 	
+	#if button pressed -> open the door for 5 seconds
+	elif button_state == 0:
+		button_pressed()
+	
 	else:
 		measure_light_intensity()
 		read_DHT22_and_automated_fan()
+
 		
 	
 
