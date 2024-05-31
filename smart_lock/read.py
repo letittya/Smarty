@@ -245,18 +245,30 @@ def read_DHT22_and_automated_fan():
 		db.child("DHT22").child("Temperature_Celcius").set(temperature_C)
 		db.child("DHT22").child("Humidity").set(humidity)
 		fan_enabled = db.child("DHT22").child("Fan_automated").get().val()
-		if(temperature_C >= 25 and fan_enabled == 'enabled'):
+		heat_enabled = db.child("DHT22").child("Heating_automated").get().val()
+		if(temperature_C >= 26 and fan_enabled == 'enabled'):
 			GPIO.output(fan,GPIO.LOW)
 			db.child("DHT22").child("Fan").set(1)
-		if(temperature_C <= 23 and fan_enabled == 'enabled'):
+		elif(temperature_C <= 24 and fan_enabled == 'enabled'):
 			GPIO.output(fan,GPIO.HIGH)
 			db.child("DHT22").child("Fan").set(0)
+		elif (temperature_C <= 18 and heat_enabled == 'enabled'):
+			GPIO.output(heat_led,GPIO.HIGH)
+			db.child("DHT22").child("Heating").set(1)
+		elif (temperature_C >= 21 and heat_enabled == 'enabled'):
+			GPIO.output(heat_led,GPIO.LOW)
+			db.child("DHT22").child("Heating").set(0)
 		# check for values from app
 		fan_rn = db.child("DHT22").child("Fan").get().val()
+		heat_rn = db.child("DHT22").child("Heating").get().val()
 		if( fan_rn == 1):
 			GPIO.output(fan,GPIO.LOW)
 		elif (fan_rn == 0):
 			GPIO.output(fan,GPIO.HIGH)
+		if( heat_rn == 1):
+			GPIO.output(heat_led,GPIO.HIGH)
+		elif ( heat_rn == 0):
+			GPIO.output(heat_led,GPIO.LOW)
 			
 
 def button_pressed():
