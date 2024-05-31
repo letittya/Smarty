@@ -33,6 +33,9 @@ export default function App() {
         <TouchableOpacity onPress={() => router.push('/fan')} activeOpacity={0.5}>
           <Image source={images.fan_img} style={{ width: 270, height: 350,  resizeMode: 'contain' }} />
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/heat')} activeOpacity={0.5}>
+          <Image source={images.heat_img} style={{ width: 270, height: 350,  resizeMode: 'contain' }} />
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push('/blinds')} activeOpacity={0.5}>
           <Image source={images.blinds_img} style={{ width: 270, height: 350,  resizeMode: 'contain' }} />
         </TouchableOpacity>

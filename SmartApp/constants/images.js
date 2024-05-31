@@ -6,5 +6,6 @@ import led_img from "../assets/images/led_img.png";
 import humidity_in from "../assets/images/humidity_in.png";
 import temperature_in from "../assets/images/temperature_in.png";
 import fan_img from "../assets/images/fan_img.png";
+import heat_img from "../assets/images/heat_img.png";
 
-export default { fan_img, temperature_in,humidity_in,led_img,temp_img , logo, lock_img, blinds_img };
+export default { heat_img, fan_img, temperature_in,humidity_in,led_img,temp_img , logo, lock_img, blinds_img };
