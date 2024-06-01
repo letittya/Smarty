@@ -9,11 +9,15 @@ const Fan = () => {
   const [isFanOn, setIsFanOn] = useState(0); // 0: Off, 1: On
   const [isLoading, setIsLoading] = useState(true);
   const [automation, setAutomation] = useState('disabled'); // 'disabled' or 'enabled'
+  const [fanOnTemp, setFanOnTemp] = useState(18); // Default to 18 degrees
+  const [fanOffTemp, setFanOffTemp] = useState(21); // Default to 21 degrees
 
   // Fetch the initial state of the fan and automation from the database
   useEffect(() => {
     const fanRef = ref(db, 'DHT22/Fan');
     const automationRef = ref(db, 'DHT22/Fan_automated');
+    const fanOnTempRef = ref(db, 'DHT22/Fan_on');
+    const fanOffTempRef = ref(db, 'DHT22/Fan_off');
 
     onValue(fanRef, (snapshot) => {
       const data = snapshot.val();
@@ -25,6 +29,16 @@ const Fan = () => {
       const data = snapshot.val();
       setAutomation(data);
     });
+
+    onValue(fanOnTempRef, (snapshot) => {
+      const data = snapshot.val();
+      setFanOnTemp(data);
+    });
+
+    onValue(fanOffTempRef, (snapshot) => {
+      const data = snapshot.val();
+      setFanOffTemp(data);
+    });
   }, []);
 
   const updateFanStatus = (newStatus) => {
@@ -35,6 +49,31 @@ const Fan = () => {
   const updateAutomation = (newStatus) => {
     setAutomation(newStatus);
     set(ref(db, 'DHT22/Fan_automated'), newStatus);
+  };
+
+  const incrementTemp = (type) => {
+    if (type === 'start') {
+      const newTemp = parseFloat((fanOnTemp + 0.1).toFixed(1));
+      setFanOnTemp(newTemp);
+      set(ref(db, 'DHT22/Fan_on'), newTemp);
+    } else {
+      const newTemp = parseFloat((fanOffTemp + 0.1).toFixed(1));
+      setFanOffTemp(newTemp);
+      set(ref(db, 'DHT22/Fan_off'), newTemp);
+    }
+  };
+
+  const decrementTemp = (type) => {
+    if (type === 'start') {
+      const newTemp = parseFloat((fanOnTemp - 0.1).toFixed(1));
+      setFanOnTemp(newTemp);
+      set(ref(db, 'DHT22/Fan_on'), newTemp);
+    } else {
+      // const newTemp = fanOffTemp - 0.1;
+      const newTemp = parseFloat((fanOffTemp - 0.1).toFixed(1));
+      setFanOffTemp(newTemp);
+      set(ref(db, 'DHT22/Fan_off'), newTemp);
+    }
   };
 
   if (isLoading) {
@@ -55,7 +94,7 @@ const Fan = () => {
           {automation === 'enabled' ? "Disable" : "Enable"} the automated
         </Text>
         <Text className='text-white font-pbold text-lg mb-3'>
-         turning on and off?
+          turning on and off?
         </Text>
         <View style={styles.switchContainer}>
           <TouchableOpacity
@@ -92,6 +131,36 @@ const Fan = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      <View style={styles.tempControlsContainer}>
+        <View style={styles.tempControl}>
+          <Text className='text-white font-pbold text-lg '>Start</Text>
+          <Text className='text-white font-pbold text-lg mb-3'>Temperature:</Text>
+          <View style={styles.tempAdjustContainer}>
+            <TouchableOpacity onPress={() => decrementTemp('start')}>
+              <Text style={styles.arrow}>▼</Text>
+            </TouchableOpacity>
+            <Text style={styles.tempText}>{fanOnTemp.toFixed(1)}°C</Text>
+            <TouchableOpacity onPress={() => incrementTemp('start')}>
+              <Text style={styles.arrow}>▲</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.tempControl}>
+          <Text className='text-white font-pbold text-lg '>Goal</Text>
+          <Text className='text-white font-pbold text-lg mb-3'>Temperature:</Text>
+          <View style={styles.tempAdjustContainer}>
+            <TouchableOpacity onPress={() => decrementTemp('goal')}>
+              <Text style={styles.arrow}>▼</Text>
+            </TouchableOpacity>
+            <Text style={styles.tempText}>{fanOffTemp.toFixed(1)}°C</Text>
+            <TouchableOpacity onPress={() => incrementTemp('goal')}>
+              <Text style={styles.arrow}>▲</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
       <StatusBar style="light" />
     </SafeAreaView>
   );
@@ -102,13 +171,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    marginTop: 150,
+    marginTop: 90,
   },
   centered_2: {
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    marginTop: -80,
+    marginTop: -150,
+  },
+  tempControlsContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: -250, // Additional adjustment to move the temperature controls up
   },
   switchContainer: {
     flexDirection: 'row',
@@ -130,6 +206,24 @@ const styles = StyleSheet.create({
   },
   switchText: {
     color: 'white',
+    fontWeight: 'bold',
+  },
+  tempControl: {
+    alignItems: 'center',
+  },
+  tempAdjustContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arrow: {
+    color: '#749D60',
+    fontSize: 30,
+    marginHorizontal: 10,
+  },
+  tempText: {
+    color: 'white',
+    fontSize: 30,
     fontWeight: 'bold',
   },
 });

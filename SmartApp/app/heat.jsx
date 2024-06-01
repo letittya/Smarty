@@ -9,11 +9,15 @@ const Heat = () => {
   const [isHeatingOn, setIsHeatingOn] = useState(0); // 0: Off, 1: On
   const [isLoading, setIsLoading] = useState(true);
   const [automation, setAutomation] = useState('disabled'); // 'disabled' or 'enabled'
+  const [heatingOnTemp, setHeatingOnTemp] = useState(18); // Default to 18 degrees
+  const [heatingOffTemp, setHeatingOffTemp] = useState(21); // Default to 21 degrees
 
   // Fetch the initial state of the heating and automation from the database
   useEffect(() => {
     const heatingRef = ref(db, 'DHT22/Heating');
     const automationRef = ref(db, 'DHT22/Heating_automated');
+    const heatingOnTempRef = ref(db, 'DHT22/Heating_on');
+    const heatingOffTempRef = ref(db, 'DHT22/Heating_off');
 
     onValue(heatingRef, (snapshot) => {
       const data = snapshot.val();
@@ -25,6 +29,16 @@ const Heat = () => {
       const data = snapshot.val();
       setAutomation(data);
     });
+
+    onValue(heatingOnTempRef, (snapshot) => {
+      const data = snapshot.val();
+      setHeatingOnTemp(data);
+    });
+
+    onValue(heatingOffTempRef, (snapshot) => {
+      const data = snapshot.val();
+      setHeatingOffTemp(data);
+    });
   }, []);
 
   const updateHeatingStatus = (newStatus) => {
@@ -35,6 +49,30 @@ const Heat = () => {
   const updateAutomation = (newStatus) => {
     setAutomation(newStatus);
     set(ref(db, 'DHT22/Heating_automated'), newStatus);
+  };
+
+  const incrementTemp = (type) => {
+    if (type === 'start') {
+      const newTemp = parseFloat((heatingOnTemp + 0.1).toFixed(1));
+      setHeatingOnTemp(newTemp);
+      set(ref(db, 'DHT22/Heating_on'), newTemp);
+    } else {
+      const newTemp = parseFloat((heatingOffTemp + 0.1).toFixed(1));
+      setHeatingOffTemp(newTemp);
+      set(ref(db, 'DHT22/Heating_off'), newTemp);
+    }
+  };
+
+  const decrementTemp = (type) => {
+    if (type === 'start') {
+      const newTemp = parseFloat((heatingOnTemp - 0.1).toFixed(1));
+      setHeatingOnTemp(newTemp);
+      set(ref(db, 'DHT22/Heating_on'), newTemp);
+    } else {
+      const newTemp = parseFloat((heatingOffTemp - 0.1).toFixed(1));
+      setHeatingOffTemp(newTemp);
+      set(ref(db, 'DHT22/Heating_off'), newTemp);
+    }
   };
 
   if (isLoading) {
@@ -55,7 +93,7 @@ const Heat = () => {
           {automation === 'enabled' ? "Disable" : "Enable"} the automated
         </Text>
         <Text className='text-white font-pbold text-lg mb-3'>
-         turning on and off?
+          turning on and off?
         </Text>
         <View style={styles.switchContainer}>
           <TouchableOpacity
@@ -92,6 +130,36 @@ const Heat = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      <View style={styles.tempControlsContainer}>
+        <View style={styles.tempControl}>
+        <Text className='text-white font-pbold text-lg '>Start</Text>
+          <Text className='text-white font-pbold text-lg mb-3'>Temperature:</Text>
+          <View style={styles.tempAdjustContainer}>
+            <TouchableOpacity onPress={() => decrementTemp('start')}>
+              <Text style={styles.arrow}>▼</Text>
+            </TouchableOpacity>
+            <Text style={styles.tempText}>{heatingOnTemp.toFixed(1)}°C</Text>
+            <TouchableOpacity onPress={() => incrementTemp('start')}>
+              <Text style={styles.arrow}>▲</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.tempControl}>
+          <Text className='text-white font-pbold text-lg '>Goal</Text>
+          <Text className='text-white font-pbold text-lg mb-3'>Temperature:</Text>
+          <View style={styles.tempAdjustContainer}>
+            <TouchableOpacity onPress={() => decrementTemp('goal')}>
+              <Text style={styles.arrow}>▼</Text>
+            </TouchableOpacity>
+            <Text style={styles.tempText}>{heatingOffTemp.toFixed(1)}°C</Text>
+            <TouchableOpacity onPress={() => incrementTemp('goal')}>
+              <Text style={styles.arrow}>▲</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
       <StatusBar style="light" />
     </SafeAreaView>
   );
@@ -102,13 +170,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    marginTop: 150,
+    marginTop: 90,
   },
   centered_2: {
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    marginTop: -80,
+    marginTop: -150,
+  },
+  tempControlsContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: -250, // Additional adjustment to move the temperature controls up
   },
   switchContainer: {
     flexDirection: 'row',
@@ -130,6 +205,24 @@ const styles = StyleSheet.create({
   },
   switchText: {
     color: 'white',
+    fontWeight: 'bold',
+  },
+  tempControl: {
+    alignItems: 'center',
+  },
+  tempAdjustContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arrow: {
+    color: '#749D60',
+    fontSize: 30,
+    marginHorizontal: 10,
+  },
+  tempText: {
+    color: 'white',
+    fontSize: 30,
     fontWeight: 'bold',
   },
 });
