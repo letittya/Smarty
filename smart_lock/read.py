@@ -55,15 +55,18 @@ photoresistor_pin = 7
 GPIO.setup(direction, GPIO.OUT)
 GPIO.setup(step, GPIO.OUT)
 
+#board pins used for microsteps
 stepper_mode = ( 8 , 10 , 12)
 GPIO.setup(stepper_mode, GPIO.OUT)
+#taken from the driver's datasheet these are the microstep configurations 
 resolution = { 'Full' : ( 0, 0, 0), 
 				'Half': ( 1, 0, 0),
 				'1/4': (0,1,0),
 				'1/8' : (1,1,0),
 				'1/16': (0,0,1),
 				'1/32' : (1,0,1) }
-				
+
+#using the 1/32 microstep so a full rotation will have 1536 steps per revolution instead of 48 thats for full-step mode				
 GPIO.output(stepper_mode, resolution['1/32'])
 
 step_count = spr * 60
@@ -203,16 +206,20 @@ def measure_light_intensity():
 	GPIO.setup(photoresistor_pin, GPIO.IN)
 	current_time = time.time()
 	diff = 0
+	#calculating the charging time of the capacitor
+	# higher charging time -> darker, lower charging time -> lighter
 	while(GPIO.input (photoresistor_pin) == GPIO.LOW):
 		diff = time.time() - current_time
 	print(diff *100000)
 	# get value from database to see if automated blinds are enabled or disabled
 	automated_blinds = db.child("Automated_blinds").get().val()
+	#if it's dark outside (night) close the blinds 
 	if( diff * 100000 > 400 and automated_blinds=='enabled'):
 		if( current_blinds_state == 1) :
 			blinds_down()
 		if( current_blinds_state == 0.5 ):
 			blinds_half(0,0,(spr * 40) )
+	#if it's light (morning) outside open the blinds 
 	elif ( diff * 100000 < 60 and automated_blinds=='enabled'):
 		if( current_blinds_state == 0 ) :
 			blinds_up();
@@ -244,18 +251,24 @@ def read_DHT22_and_automated_fan():
 		print( "Celcius: {}C,Humidity: {}%".format(temperature_C,humidity))
 		db.child("DHT22").child("Temperature_Celcius").set(temperature_C)
 		db.child("DHT22").child("Humidity").set(humidity)
+		#get from database ig automated heating and cooling is enabled 
 		fan_enabled = db.child("DHT22").child("Fan_automated").get().val()
 		heat_enabled = db.child("DHT22").child("Heating_automated").get().val()
-		if(temperature_C >= 26 and fan_enabled == 'enabled'):
+		#get all the values from the database when to turn on and off the heating/cooling (fan)
+		fan_automated_on = db.child("DHT22").child("Fan_on").get().val()
+		fan_automated_off = db.child("DHT22").child("Fan_off").get().val()
+		heat_automated_on = db.child("DHT22").child("Heating_on").get().val()
+		heat_automated_off = db.child("DHT22").child("Heating_off").get().val()
+		if(temperature_C >= fan_automated_on and fan_enabled == 'enabled'):
 			GPIO.output(fan,GPIO.LOW)
 			db.child("DHT22").child("Fan").set(1)
-		elif(temperature_C <= 24 and fan_enabled == 'enabled'):
+		elif(temperature_C <= fan_automated_off and fan_enabled == 'enabled'):
 			GPIO.output(fan,GPIO.HIGH)
 			db.child("DHT22").child("Fan").set(0)
-		elif (temperature_C <= 18 and heat_enabled == 'enabled'):
+		elif (temperature_C <= heat_automated_on and heat_enabled == 'enabled'):
 			GPIO.output(heat_led,GPIO.HIGH)
 			db.child("DHT22").child("Heating").set(1)
-		elif (temperature_C >= 21 and heat_enabled == 'enabled'):
+		elif (temperature_C >= heat_automated_off and heat_enabled == 'enabled'):
 			GPIO.output(heat_led,GPIO.LOW)
 			db.child("DHT22").child("Heating").set(0)
 		# check for values from app
