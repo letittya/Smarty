@@ -6,24 +6,28 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Lock = () => {
-  const [entries, setEntries] = useState([]);
-  const [error, setError] = useState('');
+  const [entries, setEntries] = useState([]); //stores all RFID entries
+  const [error, setError] = useState('');  // in case of errors 
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const entriesRef = ref(db, 'RFID_scans');
-    const unsubscribe = onValue(entriesRef, (snapshot) => {
+    const entriesRef = ref(db, 'RFID_scans'); //reference to the db child RFID_scans
+    // listener for changes tied to the RFID_scans, snapshot is current value
+    const unsubscribe = onValue(entriesRef, (snapshot) =>{ 
+      // data returned by Firebase, holds all entries 
       const data = snapshot.val();
       if (data) {
+        // if not empty , transforms values pairs into array
         const loadedData = Object.keys(data).map(key => ({
-          firebaseKey: key,
-          ...data[key]
+          firebaseKey: key,  //unique ID 
+          ...data[key]   //rest of data 
         })).reverse();   // to show the data from database starting from the newest entry 
-        setEntries(loadedData);
-        setIsLoading(false);
+        setEntries(loadedData); //update entries state 
+        setIsLoading(false);  //loading complete!!!
       } else {
-        console.log("No data available");
+        console.log("Empty! No data");
       }
+      //if there is an error 
     }, (error) => {
       setError(error.toString());
       console.error("Firebase read error: ", error);
@@ -32,8 +36,9 @@ const Lock = () => {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, []); //no dependencies 
 
+  //displays a loading circle-thing while data is being fetched 
   if (isLoading) {
     return (
       <SafeAreaView className='bg-primary h-full'>
@@ -45,6 +50,7 @@ const Lock = () => {
     );
   }
 
+  //style each entry in the FlatList 
   const renderItem = ({ item }) => {
     const borderColor = item.access === 'granted' ? '#226711' : '#760B0B';
     return (
@@ -77,7 +83,6 @@ const Lock = () => {
         style={styles.scrollView}
       />
       {error ? <Text className='text-green-200'>Error: {error}</Text> : null}
-      <StatusBar style="dark" />
       <StatusBar style="light" />
     </SafeAreaView>
   );

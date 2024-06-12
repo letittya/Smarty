@@ -20,17 +20,21 @@ const RootLayout = () => {
     "Poppins-Thin" : require("../assets/fonts/Poppins-Thin.ttf"),
   });
 
+  // check font loading status
   useEffect(() => {
     if(error)
       throw error;
+    //if fonts are loaded, splashscreen is hidden
     if(fontsLoaded)
       SplashScreen.hideAsync();
   }, [fontsLoaded,error])
 
+  //no error and fonts didnt load yet -> keep splashscreen visible 
   if(!fontsLoaded && !error)
     return null;
 
   return (
+    //hide the header for all the screens
     <Stack>
         <Stack.Screen name="index" options={{ headerShown: false}}/>
         <Stack.Screen name="lock" options={{ headerShown: false}}/> 
