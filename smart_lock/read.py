@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO 
 import time
+import thingspeak
 import pyrebase
 import Adafruit_DHT as dht
 from datetime import datetime
@@ -77,6 +78,11 @@ delay = 0.0208 / 25
 good_id = "789061940596"
 
 rfid_tag=SimpleMFRC522()   #create an instance, that will be used to read the cards
+
+#thingspeak setup
+channel_id = 2576884
+write_key = "U3IOG0UQJQ02V4WT"
+ts_channel = thingspeak.Channel ( channel_id , write_key)
 
 
 # configuring the firebase realtime database connection
@@ -211,6 +217,14 @@ def measure_light_intensity():
 	while(GPIO.input (photoresistor_pin) == GPIO.LOW):
 		diff = time.time() - current_time
 	print(diff *100000)
+	light_intensity = diff *100000
+	
+	#sending to ThingSpeak
+	try:
+		ts_channel.update({'field3': light_intensity})
+	except Exception as e:
+		print("Cant update ThingSpeak")
+	
 	# get value from database to see if automated blinds are enabled or disabled
 	automated_blinds = db.child("Automated_blinds").get().val()
 	#if it's dark outside (night) close the blinds 
@@ -251,6 +265,13 @@ def read_DHT22_and_automated_fan():
 		print( "Celcius: {}C,Humidity: {}%".format(temperature_C,humidity))
 		db.child("DHT22").child("Temperature_Celcius").set(temperature_C)
 		db.child("DHT22").child("Humidity").set(humidity)
+		
+		#sending to ThingSpeak
+		try:
+			ts_channel.update({'field1': temperature_C , 'field2' : humidity})
+		except Exception as e:
+			print("Cant update ThingSpeak")
+		
 		#get from database ig automated heating and cooling is enabled 
 		fan_enabled = db.child("DHT22").child("Fan_automated").get().val()
 		heat_enabled = db.child("DHT22").child("Heating_automated").get().val()
