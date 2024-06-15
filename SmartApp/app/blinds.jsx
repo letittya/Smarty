@@ -6,11 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ref, set, onValue } from 'firebase/database';
 
 const Blinds = () => {
-  const [position, setPosition] = useState(0); // 0: Closed, 0.5: Half-Open, 1: Open
+  const [position, setPosition] = useState(0); 
   const [isLoading, setIsLoading] = useState(true);
-  const [automation, setAutomation] = useState('disabled'); // 'disabled' or 'enabled'
+  const [automation, setAutomation] = useState('disabled'); 
 
-  // Fetch the initial state of the blinds and automation from the database
   useEffect(() => {
     const blindsRef = ref(db, 'Blinds');
     const automationRef = ref(db, 'Automated_blinds');
@@ -18,7 +17,7 @@ const Blinds = () => {
     onValue(blindsRef, (snapshot) => {
       const data = snapshot.val();
       setPosition(data);
-      setIsLoading(false);  // Set loading to false after fetching data
+      setIsLoading(false);  
     });
 
     onValue(automationRef, (snapshot) => {

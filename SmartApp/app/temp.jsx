@@ -112,16 +112,16 @@ const Temperature = () => {
                   }
                 ]
               }}
-              width={Dimensions.get('window').width - 40} // from react-native
+              width={Dimensions.get('window').width - 40} 
               height={220}
               yAxisLabel=""
               yAxisSuffix="°C"
-              yAxisInterval={1} // optional, defaults to 1
+              yAxisInterval={1} 
               chartConfig={{
                 backgroundColor: '#020E03',
                 backgroundGradientFrom: '#020E03',
                 backgroundGradientTo: '#020E03',
-                decimalPlaces: 1, // optional, defaults to 2dp
+                decimalPlaces: 1, 
                 color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 style: {
@@ -133,8 +133,8 @@ const Temperature = () => {
                   stroke: '#749D60'
                 }
               }}
-              yAxisMin={18}
-              yAxisMax={30}
+              yAxisMin={15}
+              yAxisMax={45}
               bezier
               style={{
                 marginVertical: 8,
@@ -161,16 +161,16 @@ const Temperature = () => {
                   }
                 ]
               }}
-              width={Dimensions.get('window').width - 40} // from react-native
+              width={Dimensions.get('window').width - 40}
               height={220}
               yAxisLabel=""
               yAxisSuffix="%"
-              yAxisInterval={1} // optional, defaults to 1
+              yAxisInterval={1}
               chartConfig={{
                 backgroundColor: '#020E03',
                 backgroundGradientFrom: '#020E03',
                 backgroundGradientTo: '#020E03',
-                decimalPlaces: 1, // optional, defaults to 2dp
+                decimalPlaces: 1, 
                 color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 style: {

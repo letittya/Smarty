@@ -56,7 +56,8 @@ const Fan = () => {
       const newTemp = parseFloat((fanOnTemp + 0.1).toFixed(1));
       setFanOnTemp(newTemp);
       set(ref(db, 'DHT22/Fan_on'), newTemp);
-    } else {
+    } 
+    else {
       const newTemp = parseFloat((fanOffTemp + 0.1).toFixed(1));
       setFanOffTemp(newTemp);
       set(ref(db, 'DHT22/Fan_off'), newTemp);
@@ -68,7 +69,8 @@ const Fan = () => {
       const newTemp = parseFloat((fanOnTemp - 0.1).toFixed(1));
       setFanOnTemp(newTemp);
       set(ref(db, 'DHT22/Fan_on'), newTemp);
-    } else {
+    } 
+    else {
       // const newTemp = fanOffTemp - 0.1;
       const newTemp = parseFloat((fanOffTemp - 0.1).toFixed(1));
       setFanOffTemp(newTemp);
@@ -184,7 +186,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    marginTop: -250, // Additional adjustment to move the temperature controls up
+    marginTop: -250, 
   },
   switchContainer: {
     flexDirection: 'row',
