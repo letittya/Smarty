@@ -228,7 +228,7 @@ def measure_light_intensity():
 	# get value from database to see if automated blinds are enabled or disabled
 	automated_blinds = db.child("Automated_blinds").get().val()
 	#if it's dark outside (night) close the blinds 
-	if( diff * 100000 > 400 and automated_blinds=='enabled'):
+	if( diff * 100000 > 1000 and automated_blinds=='enabled'):
 		if( current_blinds_state == 1) :
 			blinds_down()
 		if( current_blinds_state == 0.5 ):
@@ -262,13 +262,15 @@ def read_DHT22_and_automated_fan():
 	if humidity is not None and temperature_C is not None:
 		humidity = round(humidity,1)
 		temperature_C = round(temperature_C,1)
-		print( "Celcius: {}C,Humidity: {}%".format(temperature_C,humidity))
-		db.child("DHT22").child("Temperature_Celcius").set(temperature_C)
-		db.child("DHT22").child("Humidity").set(humidity)
+		if(humidity < 101):
+			print( "Celcius: {}C,Humidity: {}%".format(temperature_C,humidity))
+			db.child("DHT22").child("Temperature_Celcius").set(temperature_C)
+			db.child("DHT22").child("Humidity").set(humidity)
 		
 		#sending to ThingSpeak
 		try:
-			ts_channel.update({'field1': temperature_C , 'field2' : humidity})
+			if(humidity < 101):
+				ts_channel.update({'field1': temperature_C , 'field2' : humidity})
 		except Exception as e:
 			print("Cant update ThingSpeak")
 		
