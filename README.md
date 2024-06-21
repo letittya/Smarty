@@ -4,6 +4,8 @@ Smarty is a smart home that contains three main systems: smart lock, smart blind
 
 GITHUB: https://github.com/letittya/Smarty.git
 
+GITLAB: https://gitlab.upt.ro/letitia.bulica/Smarty
+
 ## Installation for the smart home
 
 The components must be connected according to the documentation. I2C and SPI communication must be enabled. 
