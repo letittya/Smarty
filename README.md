@@ -24,6 +24,7 @@ sudo pip3 install mfrc522
 sudo pip3 install spidev
 sudo pip3 install rpi_lcd
 ```
+Then run the application read.py.
 
 ## Installation for the mobile application
 
@@ -46,4 +47,3 @@ Install the Expo go app on your mobile phone. Open the app and scan the QR code 
 npx expo start
 ```
 
-The project can also be configured with your own Firebase Realtime Database, just change the conjig.js file with your project's details. 
